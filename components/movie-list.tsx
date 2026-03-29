@@ -4,18 +4,28 @@ import { styles } from "theme";
 
 const { width, height } = Dimensions.get("window");
 
-export default function MovieList({ title, data }: { title: string; data: any }) {
+export default function MovieList({
+  title,
+  data,
+  hideSeeAll,
+}: {
+  title: string;
+  data: any;
+  hideSeeAll?: boolean;
+}) {
   const { navigate } = useNavigate();
   const movieName = "Movie Name Movie NameMovie NameMovie NameMovie Name";
   return (
     <View className="mb-8 flex-1 space-y-4">
       <View className="m-4 flex-row items-center justify-between">
         <Text className="text-xl text-white">{title}</Text>
-        <Pressable>
-          <Text style={styles.text} className="text-lg">
-            See All
-          </Text>
-        </Pressable>
+        {!hideSeeAll && (
+          <Pressable>
+            <Text style={styles.text} className="text-lg">
+              See All
+            </Text>
+          </Pressable>
+        )}
       </View>
       <ScrollView
         horizontal
