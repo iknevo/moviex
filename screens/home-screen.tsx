@@ -5,8 +5,22 @@ import { Bars3CenterLeftIcon, MagnifyingGlassIcon } from "react-native-heroicons
 import { styles } from "theme";
 import TrendingMovies from "components/trending-movies";
 import MovieList from "components/movie-list";
+import { useNavigate } from "hooks/use-navigate";
+import Loading from "components/loading";
+import { useGetUpcoming } from "hooks/api/use-get-upcoming";
+import { useGetTrending } from "hooks/api/use-get-trending";
+import { useGetTopRated } from "hooks/api/use-get-top-rated";
 
 export default function HomeScreen() {
+  const { navigate } = useNavigate();
+  const { data: upcoming, isLoading: isLoadingUpcoming } = useGetUpcoming();
+  const { data: trending, isLoading: isLoadingTrending } = useGetTrending();
+  const { data: topRated, isLoading: isLoadingTopRated } = useGetTopRated();
+  const loading = isLoadingUpcoming || isLoadingTrending || isLoadingTopRated;
+  const trendingMovies = trending?.results ?? [];
+  const upcomingMovies = upcoming?.results ?? [];
+  const topRatedMovies = topRated?.results ?? [];
+
   return (
     <View className="flex-1  bg-neutral-800">
       <SafeAreaView className="ios:-mb-2 android:mb-3">
@@ -17,18 +31,22 @@ export default function HomeScreen() {
             <Text style={styles.text}>M</Text>
             oviex
           </Text>
-          <Pressable>
+          <Pressable onPress={() => navigate("Search")}>
             <MagnifyingGlassIcon size={30} strokeWidth={2} color="#ffffff" />
           </Pressable>
         </View>
       </SafeAreaView>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 10 }}>
-        <TrendingMovies data={[1, 2, 3]} />
-        <MovieList title="Upcoming" data={[1, 2, 3]} />
-        <MovieList title="Top Rated" data={[1, 2, 3]} />
-      </ScrollView>
+      {loading ? (
+        <Loading />
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 10 }}>
+          {trendingMovies.length > 0 && <TrendingMovies data={trendingMovies} />}
+          {upcomingMovies.length > 0 && <MovieList title="Upcoming" data={upcomingMovies} />}
+          {topRatedMovies.length > 0 && <MovieList title="Top Rated" data={topRatedMovies} />}
+        </ScrollView>
+      )}
     </View>
   );
 }

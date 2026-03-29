@@ -1,6 +1,8 @@
 import { useNavigate } from "hooks/use-navigate";
+import { image500 } from "lib/api";
 import { Dimensions, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { styles } from "theme";
+import { Movie } from "types";
 
 const { width, height } = Dimensions.get("window");
 
@@ -14,7 +16,6 @@ export default function MovieList({
   hideSeeAll?: boolean;
 }) {
   const { navigate } = useNavigate();
-  const movieName = "Movie Name Movie NameMovie NameMovie NameMovie Name";
   return (
     <View className="mb-8 flex-1 space-y-4">
       <View className="m-4 flex-row items-center justify-between">
@@ -31,17 +32,17 @@ export default function MovieList({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}>
-        {data.map((movie: any) => (
-          <Pressable key={movie} onPress={() => navigate("Movie", { id: movie.id })}>
+        {data.map((movie: Movie) => (
+          <Pressable key={movie.id} onPress={() => navigate("Movie", { movie })}>
             <View className="mr-4 space-y-1">
               <Image
-                source={require("../assets/poster.webp")}
+                source={{ uri: image500(movie.poster_path) }}
                 className="rounded-3xl"
                 style={{ width: width * 0.33, height: height * 0.22 }}
               />
             </View>
-            <Text className="ml-1 text-neutral-300">
-              {movieName.length > 14 ? movieName.slice(0, 14) + "..." : movieName}
+            <Text className="ml-1 mt-2 text-neutral-300">
+              {movie.title.length > 14 ? movie.title.slice(0, 14) + "..." : movie.title}
             </Text>
           </Pressable>
         ))}
