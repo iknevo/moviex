@@ -1,6 +1,6 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { endpoints } from "config/constants";
-import { ApiResponse, Movie } from "types";
+import { ApiResponse, CreditsResponse, Movie, MovieDetails } from "types";
 
 const TMDB_API_KEY = "4799f41c57763fc168903b60ee62450a";
 
@@ -14,33 +14,27 @@ export const api = axios.create({
   },
 });
 
-const apiCall = async (
-  endpoint: string,
-  params?: Record<string, any>
-): Promise<ApiResponse<Movie>> => {
-  const options: AxiosRequestConfig = {
-    method: "GET",
-    url: endpoint,
-    params: params ? params : {},
-  };
+const apiCall = async <T>(endpoint: string, params?: Record<string, any>): Promise<T> => {
   try {
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
-    const res = await api.request<ApiResponse<Movie>>(options);
+    const res = await api.get<T>(endpoint, {
+      params: params ?? {},
+    });
+
     return res.data;
   } catch (error) {
-    console.error("error: ", error);
-    return {
-      page: 1,
-      results: [],
-      total_pages: 0,
-      total_results: 0,
-    };
+    console.error("API Error:", error);
+    throw error;
   }
 };
 
-export const getTrendingMovies = () => apiCall(endpoints.trending);
-export const getUpcomingMovies = () => apiCall(endpoints.upcoming);
-export const getTopRatedMovies = () => apiCall(endpoints.topRated);
+export const getTrendingMovies = () => apiCall<ApiResponse<Movie>>(endpoints.trending);
+export const getUpcomingMovies = () => apiCall<ApiResponse<Movie>>(endpoints.upcoming);
+export const getTopRatedMovies = () => apiCall<ApiResponse<Movie>>(endpoints.topRated);
+export const getMovieById = (id: number) => apiCall<MovieDetails>(`${endpoints.movie}/${id}`);
+export const getMovieCredits = (id: number) =>
+  apiCall<CreditsResponse>(`${endpoints.movie}/${id}/credits`);
+export const getMovieSimilars = (id: number) =>
+  apiCall<ApiResponse<Movie>>(`${endpoints.movie}/${id}/similar`);
 
 export const IMAGE_500_URL = "https://image.tmdb.org/t/p/w500";
 export const IMAGE_342_URL = "https://image.tmdb.org/t/p/w342";

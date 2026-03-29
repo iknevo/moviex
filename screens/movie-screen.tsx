@@ -1,9 +1,15 @@
-import { useRoute } from "@react-navigation/native";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import CastMembers from "components/cast-members";
 import Loading from "components/loading";
 import MovieList from "components/movie-list";
+import { POSTER_FALLBACK_URI } from "config/constants";
 import { LinearGradient } from "expo-linear-gradient";
+import { useGetMovieById } from "hooks/api/use-get-movie-by-id";
+import { useGetMovieCrew } from "hooks/api/use-get-movie-crew";
+import { useGetMovieSimilars } from "hooks/api/use-get-movie-similars";
 import { useNavigate } from "hooks/use-navigate";
+import { image500 } from "lib/api";
+import { RootStackParamList } from "navigation/app-navigation";
 import { useState } from "react";
 import { Dimensions, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { ChevronLeftIcon } from "react-native-heroicons/outline";
@@ -12,17 +18,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { styles, theme } from "theme";
 
 const { width, height } = Dimensions.get("window");
+type MovieRouteProp = RouteProp<RootStackParamList, "Movie">;
 
 export default function MovieScreen() {
   const [isFav, setIsFav] = useState(false);
-  const [castMembers, setCastMembers] = useState([1, 2, 3, 4, 5, 6]);
-  const [similarMovies, setSimilarMovies] = useState([1, 2, 3, 4, 5, 6]);
-  const { params } = useRoute();
-  const { id } = params;
-  const { navigate, goBack } = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const {
+    params: { id },
+  } = useRoute<MovieRouteProp>();
 
-  const movieName = "Movie Name Movie NameMovie NameMovie NameMovie Name";
+  const { data: movie, isLoading: isLoadingMovieDetails } = useGetMovieById(id);
+  const { data: movieSimilars, isLoading: isLoadingMovieSimilars } = useGetMovieSimilars(id);
+  const { data: movieCrew, isLoading: isLoadingMovieCrew } = useGetMovieCrew(id);
+
+  const similarMovies = movieSimilars?.results ?? [];
+
+  const isLoading = isLoadingMovieDetails || isLoadingMovieSimilars || isLoadingMovieCrew;
+
+  const { goBack } = useNavigate();
+
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 20 }} className="flex-1 bg-neutral-800">
       <View className="w-full">
@@ -35,13 +48,13 @@ export default function MovieScreen() {
             <HeartIcon size={35} color={isFav ? theme.background : "#cccccc"} />
           </Pressable>
         </SafeAreaView>
-        {loading ? (
+        {isLoading ? (
           <Loading />
         ) : (
           <>
             <View style={{ position: "relative" }}>
               <Image
-                source={require("../assets/poster.webp")}
+                source={{ uri: image500(movie?.poster_path) || POSTER_FALLBACK_URI }}
                 style={{ width, height: height * 0.55 }}
               />
 
@@ -61,28 +74,28 @@ export default function MovieScreen() {
 
             <View className="space-y-3" style={{ marginTop: -(height * 0.09) }}>
               <Text className="text-center text-3xl font-bold tracking-wider text-white">
-                {movieName}
+                {movie?.title}
               </Text>
-              <Text className="text-center text-base font-semibold text-neutral-400">
-                released - year - 178 min
-              </Text>
+              {movie?.id ? (
+                <Text className="text-center text-base font-semibold text-neutral-400">
+                  {movie?.status} - {movie?.release_date.split("-")[0]} - {movie?.runtime} mins
+                </Text>
+              ) : null}
               <View className="mx-4 flex-row justify-center space-x-2">
-                <Text className="text-center text-base font-semibold text-neutral-400">
-                  Action -
-                </Text>
-                <Text className="text-center text-base font-semibold text-neutral-400">
-                  Thrill -
-                </Text>
-                <Text className="text-center text-base font-semibold text-neutral-400">comedy</Text>
+                {movie?.genres?.map((genre, index) => (
+                  <Text
+                    key={genre.id}
+                    className="text-center text-base font-semibold text-neutral-400">
+                    {genre.name} {movie.genres.length !== index + 1 ? "-" : ""}
+                  </Text>
+                ))}
               </View>
-              <Text className="mx-4 tracking-wide text-neutral-400">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat, itaque nobis
-                deleniti at animi ducimus dolorum pariatur, possimus ratione facere laudantium quasi
-                cum perferendis. Maxime esse quo earum nesciunt impedit?
-              </Text>
+              <Text className="m-4 tracking-wide text-neutral-400">{movie?.overview}</Text>
             </View>
-            <CastMembers cast={castMembers} />
-            <MovieList title="Similar Movies" data={similarMovies} hideSeeAll />
+            {movieCrew?.cast && <CastMembers cast={movieCrew?.cast} />}
+            {similarMovies?.length > 0 && (
+              <MovieList title="Similar Movies" data={similarMovies} hideSeeAll />
+            )}
           </>
         )}
       </View>

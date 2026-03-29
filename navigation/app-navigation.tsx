@@ -4,12 +4,11 @@ import HomeScreen from "screens/home-screen";
 import MovieScreen from "screens/movie-screen";
 import PersonScreen from "screens/person-screen";
 import SearchScreen from "screens/search-screen";
-import { Movie } from "types";
 
 export type RootStackParamList = {
   Home: undefined;
-  Movie: { movie: Movie };
-  Person: { movie: Movie };
+  Movie: { id: number };
+  Person: { id: number };
   Search: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();

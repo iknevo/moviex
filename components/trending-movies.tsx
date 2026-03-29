@@ -1,3 +1,4 @@
+import { POSTER_FALLBACK_URI } from "config/constants";
 import { useNavigate } from "hooks/use-navigate";
 import { image500 } from "lib/api";
 import { Dimensions, Image, Pressable, Text, View } from "react-native";
@@ -13,7 +14,7 @@ const { width, height } = Dimensions.get("window");
 export default function TrendingMovies({ data }: Props) {
   const { navigate } = useNavigate();
   const handlePress = (movie: Movie) => {
-    navigate("Movie", { movie });
+    navigate("Movie", { id: movie.id });
   };
 
   return (
@@ -46,7 +47,7 @@ const MovieCard = ({ item, handlePress }: { item: Movie; handlePress: (item: Mov
     <Pressable style={{ flex: 1 }} onPress={() => handlePress(item)}>
       <Image
         className="rounded-3xl"
-        source={{ uri: image500(item.poster_path) }}
+        source={{ uri: image500(item.poster_path) || POSTER_FALLBACK_URI }}
         style={{ width: width * 0.8, height: 600, objectFit: "cover" }}
       />
     </Pressable>

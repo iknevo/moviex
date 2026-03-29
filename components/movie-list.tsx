@@ -1,3 +1,4 @@
+import { POSTER_FALLBACK_URI } from "config/constants";
 import { useNavigate } from "hooks/use-navigate";
 import { image500 } from "lib/api";
 import { Dimensions, Image, Pressable, ScrollView, Text, View } from "react-native";
@@ -33,10 +34,10 @@ export default function MovieList({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}>
         {data.map((movie: Movie) => (
-          <Pressable key={movie.id} onPress={() => navigate("Movie", { movie })}>
+          <Pressable key={movie.id} onPress={() => navigate("Movie", { id: movie.id })}>
             <View className="mr-4 space-y-1">
               <Image
-                source={{ uri: image500(movie.poster_path) }}
+                source={{ uri: image500(movie.poster_path) || POSTER_FALLBACK_URI }}
                 className="rounded-3xl"
                 style={{ width: width * 0.33, height: height * 0.22 }}
               />
