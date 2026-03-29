@@ -13,7 +13,7 @@ export default function MovieList({
   hideSeeAll,
 }: {
   title: string;
-  data: any;
+  data: Movie[];
   hideSeeAll?: boolean;
 }) {
   const { navigate } = useNavigate();
@@ -33,7 +33,7 @@ export default function MovieList({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}>
-        {data.map((movie: Movie) => (
+        {data.map((movie) => (
           <Pressable key={movie.id} onPress={() => navigate("Movie", { id: movie.id })}>
             <View className="mr-4 space-y-1">
               <Image
