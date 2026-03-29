@@ -1,18 +1,15 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "navigation/app-navigation";
+import { useNavigate } from "hooks/use-navigate";
 import { Dimensions, Image, Pressable, Text, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 const { width, height } = Dimensions.get("window");
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function TrendingMovies({ data }: { data: any[] }) {
-  const { navigate } = useNavigation<NavigationProp>();
+  const { navigate } = useNavigate();
   const handlePress = (item: any) => {
     navigate("Movie", { id: "101010" });
+    console.log("Pressed item:", item);
   };
   return (
-    <View className="mb-8 ">
+    <View className="mb-8">
       <Text className="mx-4 mb-5 text-xl text-white">Trending</Text>
       <View className="flex-1">
         <Carousel
@@ -21,17 +18,11 @@ export default function TrendingMovies({ data }: { data: any[] }) {
           loop={true}
           pagingEnabled={true}
           snapEnabled={true}
-          style={{
-            width: width,
-            height: height,
-          }}
+          style={{ width: width, height: height * 0.5 }}
           mode="parallax"
-          modeConfig={{
-            parallaxScrollingScale: 0.9,
-            parallaxScrollingOffset: 50,
-          }}
+          modeConfig={{ parallaxScrollingScale: 0.9, parallaxScrollingOffset: 50 }}
           renderItem={({ item }) => (
-            <View style={{ alignItems: "center" }}>
+            <View style={{ alignItems: "center", backgroundColor: "red" }}>
               <MovieCard item={item} handlePress={handlePress} />
             </View>
           )}
@@ -44,11 +35,11 @@ export default function TrendingMovies({ data }: { data: any[] }) {
 }
 const MovieCard = ({ item, handlePress }: { item: any; handlePress: (item: any) => void }) => {
   return (
-    <Pressable style={{ flex: 1 }}>
+    <Pressable style={{ flex: 1 }} onPress={() => handlePress(item)}>
       <Image
         className="rounded-3xl"
         source={require("../assets/poster.webp")}
-        style={{ width: width, height: 600 }}
+        style={{ width: width * 0.8, height: 600, objectFit: "cover" }}
       />
     </Pressable>
   );
