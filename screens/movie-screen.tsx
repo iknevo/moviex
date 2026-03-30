@@ -31,6 +31,7 @@ export default function MovieScreen() {
   const { data: movieCrew, isLoading: isLoadingMovieCrew } = useGetMovieCrew(id);
 
   const similarMovies = movieSimilars?.results ?? [];
+  const movieCrewResults = movieCrew?.cast ?? [];
 
   const isLoading = isLoadingMovieDetails || isLoadingMovieSimilars || isLoadingMovieCrew;
 
@@ -92,7 +93,7 @@ export default function MovieScreen() {
               </View>
               <Text className="m-4 tracking-wide text-neutral-400">{movie?.overview}</Text>
             </View>
-            {movieCrew?.cast && <CastMembers cast={movieCrew?.cast} />}
+            {movieCrewResults.length > 0 && <CastMembers cast={movieCrewResults} />}
             {similarMovies?.length > 0 && (
               <MovieList title="Similar Movies" data={similarMovies} hideSeeAll />
             )}

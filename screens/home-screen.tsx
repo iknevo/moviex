@@ -10,8 +10,10 @@ import Loading from "components/loading";
 import { useGetUpcoming } from "hooks/api/use-get-upcoming";
 import { useGetTrending } from "hooks/api/use-get-trending";
 import { useGetTopRated } from "hooks/api/use-get-top-rated";
+import { useNavigation, DrawerActions } from "@react-navigation/native";
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   const { navigate } = useNavigate();
   const { data: upcoming, isLoading: isLoadingUpcoming } = useGetUpcoming();
   const { data: trending, isLoading: isLoadingTrending } = useGetTrending();
@@ -21,12 +23,18 @@ export default function HomeScreen() {
   const upcomingMovies = upcoming?.results ?? [];
   const topRatedMovies = topRated?.results ?? [];
 
+  const openDrawer = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
+
   return (
-    <View className="flex-1  bg-neutral-800">
+    <View className="flex-1 bg-neutral-800">
       <SafeAreaView className="ios:-mb-2 android:mb-3">
         <StatusBar style="light" />
         <View className="mx-4 mt-4 flex-row items-center justify-between">
-          <Bars3CenterLeftIcon size={30} strokeWidth={2} color="#ffffff" />
+          <Pressable onPress={openDrawer}>
+            <Bars3CenterLeftIcon size={30} strokeWidth={2} color="#ffffff" />
+          </Pressable>
           <Text className="text-3xl font-bold text-white">
             <Text style={styles.text}>M</Text>
             oviex

@@ -1,22 +1,33 @@
 import Loading from "components/loading";
+import { useSearch } from "hooks/api/use-search";
 import { useNavigate } from "hooks/use-navigate";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dimensions, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { XMarkIcon } from "react-native-heroicons/outline";
+import { XMarkIcon, FilmIcon } from "react-native-heroicons/outline";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { debounce } from "lodash";
+import { image185 } from "lib/api";
+import { POSTER_FALLBACK_URI } from "config/constants";
 
 const { width, height } = Dimensions.get("window");
 
 export default function SearchScreen() {
   const { navigate, push } = useNavigate();
-  const [results] = useState([1, 2, 3, 4]);
-  const movieName = "Movie Name Movie NameMovie NameMovie NameMovie Name";
-  const [loading] = useState(false);
+  const [query, setQuery] = useState("");
+  const { data, isLoading } = useSearch(query);
+  const results = data?.results ?? [];
+
+  const debouncedSearch = useMemo(() => debounce((value: string) => setQuery(value), 400), []);
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-800">
       <View className="mx-4 my-3 flex-row items-center justify-between rounded-full border border-neutral-500">
         <TextInput
+          onChangeText={debouncedSearch}
           placeholder="Search Movies"
           placeholderTextColor={"lightgray"}
           className="flex-1 pb-1 pl-6 text-base font-semibold tracking-wider text-white"
@@ -29,7 +40,7 @@ export default function SearchScreen() {
           <XMarkIcon size={25} color="#ffffff" />
         </Pressable>
       </View>
-      {loading ? (
+      {isLoading ? (
         <Loading />
       ) : results.length > 0 ? (
         <ScrollView
@@ -42,15 +53,16 @@ export default function SearchScreen() {
               <Pressable
                 key={i}
                 onPress={() => {
-                  push("Movie", { id: "1" });
+                  push("Movie", { id: item.id });
                 }}>
                 <View className="mb-4 space-y-2">
                   <Image
-                    source={require("../assets/poster.webp")}
+                    source={{ uri: image185(item.poster_path) || POSTER_FALLBACK_URI }}
                     style={{ width: width * 0.44, height: height * 0.3 }}
+                    className="rounded-md"
                   />
-                  <Text className="ml-1 text-neutral-300">
-                    {movieName.length > 22 ? movieName.slice(0, 22) + "..." : movieName}
+                  <Text className="ml-1 mt-1 text-neutral-300">
+                    {item.title.length > 22 ? item.title.slice(0, 22) + "..." : item.title}
                   </Text>
                 </View>
               </Pressable>
@@ -58,7 +70,12 @@ export default function SearchScreen() {
           </View>
         </ScrollView>
       ) : (
-        <Text>no results found</Text>
+        <View className="mt-20 items-center px-6">
+          <FilmIcon size={40} color={"#ffffff"} />
+          <Text className="mt-2 text-center text-3xl text-neutral-400">
+            Start by searching for a movie.
+          </Text>
+        </View>
       )}
     </SafeAreaView>
   );
